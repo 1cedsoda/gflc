@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 public class Client extends Actor
 {
     public BufferedReader in;
-    public BufferedWriter out;
+    public DataOutputStream out;
     public Socket socket;
     public boolean connected = false;
     
@@ -25,10 +25,8 @@ public class Client extends Actor
         try {
             this.socket = new Socket("localhost", 1223);
             this.in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-            OutputStream os = socket.getOutputStream();
-            OutputStreamWriter osw = new OutputStreamWriter(os);
-            BufferedWriter bw = new BufferedWriter(osw);
-            this.out = bw;
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+            this.out = out;
             this.connected = true;
             System.out.println(this + ": connected");
         } catch (IOException e) {
@@ -39,8 +37,7 @@ public class Client extends Actor
     public void send(String data) {
        try {
            //this.out.writeBytes(data);
-           this.out.write(data + "\n");
-           this.out.flush();
+           this.out.writeUTF(data);
            System.out.println(this + ": [out] " + data);
        } catch (IOException e) {e.printStackTrace();}
     }

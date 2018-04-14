@@ -6,10 +6,11 @@ import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 
 public class Server extends Actor
 {
-    public List<BufferedReader> in = new ArrayList<>();
+    public List<DataInputStream> in = new ArrayList<>();
     public List<PrintWriter> out = new ArrayList<>();
     public int port;
     public Acceptor acceptor;
+    public boolean acceptorRunning = false;
     /* Konstruktor
      */
     public Server(int port) {
@@ -29,29 +30,33 @@ public class Server extends Actor
             }
         } catch (Exception e) {e.printStackTrace();}
     }
-    
     /* Lässt wiederholt Nachrichten abfragen
      */
     public void act() {
-        if (this.acceptor == null) {this.startAcceptor();} //der connection listener wird einmal gestartet
-        this.cIM();
+        if (!this.acceptorRunning) {this.startAcceptor();} //der connection listener wird einmal gestartet
+        //this.cIM();
     }
     public void startAcceptor() {
         this.destroyOtherServers();
-        Acceptor acceptor = new Acceptor(getWorld());
+        Acceptor acceptor = new Acceptor(this);
         acceptor.start();
+        this.acceptorRunning = true;
+        //ThreadFucker tf = new ThreadFucker(this, acceptor);
     }
     /* Die Datenstreams eines Clients hinzufügen. 
      * Wird extern von einem "Acceptor"-Thread aufgerufen, welcher alle Verbindungs-Anfragen annimmt
      */
     public void addClient(Socket socket) {
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            //in.mark(1);
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            this.in.add(in);
-            this.out.add(out);
-            System.out.println(this + ": Client added.");
+            DataInputStream din = new DataInputStream(socket.getInputStream());
+            PrintWriter pw = new PrintWriter(socket.getOutputStream(), true);
+            System.out.println(this + ": size before " + this.in.size());
+            this.in.add(din);
+            System.out.println(this + ": size after  " + this.in.size());
+            System.out.println(this.in);
+            this.out.add(pw);
+            System.out.println(this + ": Client connected");
+            
         } catch (IOException e) {e.printStackTrace();}
     }
     /*Alle input streams nach neuen Nachrichten abfragen
@@ -60,17 +65,13 @@ public class Server extends Actor
         //System.out.println(this.in);
         for (int i = 0; i < this.in.size(); i++) {
             String data;
-            System.out.println(this.in.get(i));
+            System.out.println(i);
             try {
-                System.out.println("I");
-                if((data = this.in.get(i).readLine()) != null){
-                    System.out.println("II");
-                    System.out.println("\"" + data + "\"");
-                    System.out.println("III");
+                while(!this.in.isEmpty()) {
+                    System.out.println(this.in.get(i).readUTF() + "\n");
                 }
-                System.out.println("IV");
-                this.in.get(i).reset();
-                System.out.println("IV");
+            } catch (EOFException e) {
+                System.out.println("alright");
             } catch (IOException e) {
                 this.in.remove(i);
                 e.printStackTrace();
