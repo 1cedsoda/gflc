@@ -16,7 +16,7 @@ public class Acceptor extends Thread
             System.out.println(this + ": listening");
             while(this.server != null) {
                 Socket socket = serversocket.accept();
-                this.server.addClient(socket);
+                this.server.addClientStreams(socket);
             }
             System.out.println(this + ": serverlink is null");
         }catch(BindException e){

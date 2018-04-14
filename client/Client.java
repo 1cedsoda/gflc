@@ -9,6 +9,7 @@ public class Client extends Actor
     public DataOutputStream out;
     public Socket socket;
     public boolean connected = false;
+    public int a;
     
     public Client() {
         System.out.println(this + ": constructed");
@@ -16,9 +17,8 @@ public class Client extends Actor
     
     public void act() 
     {
-            //if (!this.connected) {this.connect();}
-            //this.checkIncomingMessages();
-            this.send("test");
+            this.send(Integer.toString(this.a));
+            this.a++;
     }    
     
     public void connect() {
@@ -35,21 +35,31 @@ public class Client extends Actor
     }
     
     public void send(String data) {
-       try {
-           //this.out.writeBytes(data);
-           this.out.writeUTF("\n");
-           this.out.writeUTF(data + "\n");
-           System.out.println(this + ": [out] " + data);
-       } catch (IOException e) {e.printStackTrace();}
+        if(this.connected) {
+            try {
+                this.out.writeUTF(data + "\n");
+                System.out.println(this + ": [out] " + data);
+            } catch (IOException e) {
+                System.out.println(this + ": connection lost");
+            }
+        } else {
+            System.out.println(this + ": not connected");
+        }
     }
     
     public void checkIncomingMessages() {
-        String data;
-        try {
-            if ((data = this.in.readLine()) != null) {
-                System.out.println(this + ": [in] " + data);
+        if(this.connected) {
+            String data;
+            try {
+                while(this.in.ready()) {
+                    data = this.in.readLine();
+                    System.out.println(this + ": [in] " + data);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {e.printStackTrace();}
+        } else {
+            System.out.println(this + ": no connected");
+        }
     }
-    
 }
