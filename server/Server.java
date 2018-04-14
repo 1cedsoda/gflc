@@ -10,7 +10,6 @@ public class Server extends Actor
     public List<PrintWriter> out = new ArrayList<>();
     public int port;
     public Acceptor acceptor;
-    public boolean acceptorRunning = false;
     /* Konstruktor
      */
     public Server(int port) {
@@ -34,15 +33,13 @@ public class Server extends Actor
     /* Lässt wiederholt Nachrichten abfragen
      */
     public void act() {
-        if (!this.acceptorRunning) {this.startAcceptor();} //der connection listener wird einmal gestartet
+        if (this.acceptor == null) {this.startAcceptor();} //der connection listener wird einmal gestartet
         this.cIM();
     }
     public void startAcceptor() {
         this.destroyOtherServers();
-        System.out.println(this + ": started");
-        this.acceptor = new Acceptor(getWorld());
-        this.acceptor.start();
-        this.acceptorRunning = true;
+        Acceptor acceptor = new Acceptor(getWorld());
+        acceptor.start();
     }
     /* Die Datenstreams eines Clients hinzufügen. 
      * Wird extern von einem "Acceptor"-Thread aufgerufen, welcher alle Verbindungs-Anfragen annimmt
@@ -54,14 +51,8 @@ public class Server extends Actor
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             this.in.add(in);
             this.out.add(out);
-            System.out.println("Client added.");
+            System.out.println(this + ": Client added.");
         } catch (IOException e) {e.printStackTrace();}
-    }
-    public void showAcceptor() {
-            World world = getWorld();
-            List<Acceptor> acceptors = new ArrayList<Acceptor>();
-            System.out.println(world.getObjects(Acceptor.class));
-            
     }
     /*Alle input streams nach neuen Nachrichten abfragen
      */

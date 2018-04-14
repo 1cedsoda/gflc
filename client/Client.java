@@ -11,6 +11,7 @@ public class Client extends Actor
     public boolean connected = false;
     
     public Client() {
+        System.out.println(this + ": constructed");
     }
     
     public void act() 
@@ -30,7 +31,9 @@ public class Client extends Actor
             this.out = bw;
             this.connected = true;
             System.out.println(this + ": connected");
-        } catch (IOException e) {e.printStackTrace();}
+        } catch (IOException e) {
+            System.out.println(this + ": Failed to connect");
+        }
     }
     
     public void send(String data) {
