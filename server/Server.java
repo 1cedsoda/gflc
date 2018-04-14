@@ -34,7 +34,7 @@ public class Server extends Actor
      */
     public void act() {
         if (!this.acceptorRunning) {this.startAcceptor();} //der connection listener wird einmal gestartet
-        //this.cIM();
+        this.checkIncomingMessages();
     }
     public void startAcceptor() {
         this.destroyOtherServers();
@@ -77,7 +77,7 @@ public class Server extends Actor
                 e.printStackTrace();
             }
         }
-        System.out.println("DONE");
+       // System.out.println("DONE");
     }
     
     public void cIM() {
