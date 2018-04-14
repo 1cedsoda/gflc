@@ -37,7 +37,8 @@ public class Client extends Actor
     public void send(String data) {
        try {
            //this.out.writeBytes(data);
-           this.out.writeUTF(data);
+           this.out.writeUTF("\n");
+           this.out.writeUTF(data + "\n");
            System.out.println(this + ": [out] " + data);
        } catch (IOException e) {e.printStackTrace();}
     }

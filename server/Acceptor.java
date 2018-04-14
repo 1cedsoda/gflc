@@ -20,7 +20,7 @@ public class Acceptor extends Thread
             }
             System.out.println(this + ": serverlink is null");
         }catch(BindException e){
-            System.out.println(this + ": another thread is already running");
+            System.out.println(this + ": another thread is already running. Commiting suicide...");
             System.exit(1);
         }catch(IOException e){
             e.printStackTrace();

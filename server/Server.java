@@ -6,7 +6,7 @@ import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 
 public class Server extends Actor
 {
-    public List<DataInputStream> in = new ArrayList<>();
+    public List<BufferedReader> in = new ArrayList<>();
     public List<PrintWriter> out = new ArrayList<>();
     public int port;
     public Acceptor acceptor;
@@ -48,10 +48,10 @@ public class Server extends Actor
      */
     public void addClient(Socket socket) {
         try {
-            DataInputStream din = new DataInputStream(socket.getInputStream());
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter pw = new PrintWriter(socket.getOutputStream(), true);
             System.out.println(this + ": size before " + this.in.size());
-            this.in.add(din);
+            this.in.add(in);
             System.out.println(this + ": size after  " + this.in.size());
             System.out.println(this.in);
             this.out.add(pw);
@@ -64,11 +64,11 @@ public class Server extends Actor
     public void checkIncomingMessages() {
         //System.out.println(this.in);
         for (int i = 0; i < this.in.size(); i++) {
-            String data;
+            String inputData;
             System.out.println(i);
             try {
-                while(!this.in.isEmpty()) {
-                    System.out.println(this.in.get(i).readUTF() + "\n");
+                if((inputData = this.in.get(i).readLine()) != null) {
+                    System.out.println(this.in.get(i).readLine());
                 }
             } catch (EOFException e) {
                 System.out.println("alright");
