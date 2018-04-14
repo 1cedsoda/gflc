@@ -1,0 +1,49 @@
+import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.concurrent.TimeUnit;
+
+public class Client extends Actor
+{
+    public BufferedReader in;
+    public PrintWriter out;
+    public Socket socket;
+    public boolean connected = false;
+    
+    public Client() {
+    }
+    
+    public void act() 
+    {
+            //if (!this.connected) {this.connect();}
+            this.checkIncomingMessages()
+    }    
+    
+    public void connect() {
+        try {
+            this.socket = new Socket("localhost", 1223);
+            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            this.out = new PrintWriter(socket.getOutputStream(), true);
+            this.connected = true;
+            System.out.println(this + ": connected");
+        } catch (IOException e) {e.printStackTrace();}
+    }
+    
+    public void send(String data) {
+       this.out.write(data);
+       System.out.println(this + ": [out] " + data);
+    }
+    
+    public void checkIncomingMessages() {
+        String data;
+        try {
+            if ((data = this.in.readLine()) != null) {
+                System.out.println(this + ": [in] " + data);
+            }
+        } catch (IOException e) {e.printStackTrace();}
+    }
+    
+}

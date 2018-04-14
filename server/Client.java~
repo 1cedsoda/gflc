@@ -1,0 +1,15 @@
+import java.net.*;
+import java.io.*;
+public class Client  
+{
+    public Client()
+    {   
+        try {
+            Socket Anschluss = new Socket("127.0.0.1",6000);
+            PrintWriter Ausgabe= new PrintWriter(Anschluss.getOutputStream(),true);
+            Ausgabe.println("Guten Tag und viel Spass!");
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
