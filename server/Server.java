@@ -5,9 +5,10 @@ import java.util.concurrent.TimeUnit;
 import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 
 public class Server extends Actor
-{
+{ 
+    public List<Integer> crabs = new ArrayList<>();
     public List<BufferedReader> in = new ArrayList<>();
-    public List<DataOutputStream> out = new ArrayList<>(); 
+    public List<DataOutputStream> out = new ArrayList<>();
     public Acceptor acceptor;
     public boolean acceptorRunning = false;
     public int port;
@@ -43,7 +44,7 @@ public class Server extends Actor
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             this.in.add(in);
             this.out.add(out);
-            System.out.println(this + ": Client connected");        
+            System.out.println(this + ": Client connected");
         } catch (IOException e) {e.printStackTrace();}
     }
     
@@ -67,7 +68,8 @@ public class Server extends Actor
                 while(this.in.get(i).ready()) {
                     data = this.in.get(i).readLine();
                     System.out.println(this + ": [in][" + i + "] " + data);
-            }
+                    this.handleMessage(data);
+                }
             } catch (EOFException e) {
                 System.out.println("alright");
             } catch (IOException e) {
@@ -75,5 +77,19 @@ public class Server extends Actor
                 e.printStackTrace();
             }
         }
+    }
+    
+    public void handleMessage(String data) {
+        String[] com = data.split("~");
+        if(com[0] == "SET") {
+            String type = com[1]; //Object class
+            int oid = Integer.parseInt(com[2]); //Object ID
+            String key = com[3]; //Variable name
+            String value = com[4]; //new variable value
+        }
+    }
+    
+    public void setObjectProperty(String type, int oid, String key, String value) {
+        //some code in future
     }
 }

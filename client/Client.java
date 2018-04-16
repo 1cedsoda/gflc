@@ -17,8 +17,7 @@ public class Client extends Actor
     
     public void act() 
     {
-            this.send(Integer.toString(this.a));
-            this.a++;
+            this.checkIncomingMessages();
     }    
     
     public void connect() {
@@ -61,5 +60,10 @@ public class Client extends Actor
         } else {
             System.out.println(this + ": no connected");
         }
+    }
+    
+    public void initWorld() {
+        Crab crab = new Crab();
+        getWorld().addObject(crab, 600, 200);
     }
 }
