@@ -1,10 +1,12 @@
 import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 import java.io.*;
 import java.net.*;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class Client extends Actor
 {
+    public Map<Integer, Crab> crabs = new HashMap<Integer, Crab>();
     public BufferedReader in;
     public DataOutputStream out;
     public Socket socket;
@@ -53,6 +55,7 @@ public class Client extends Actor
                 while(this.in.ready()) {
                     data = this.in.readLine();
                     System.out.println(this + ": [in] " + data);
+                    this.handleMessage(data);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -62,8 +65,39 @@ public class Client extends Actor
         }
     }
     
-    public void initWorld() {
-        Crab crab = new Crab();
-        getWorld().addObject(crab, 600, 200);
+        public void handleMessage(String data) {
+        String[] com = data.split("~");
+        if(com[0] == "SET") {
+            String type = com[1]; //Object class
+            int oid = Integer.parseInt(com[2]); //Object ID
+            String key = com[3]; //Variable name
+            String value = com[4]; //new variable value
+            this.setObjectProperty(type, oid, key, value);
+        } else if (com[0] == "ADD") {
+            String type = com[1]; //Object class
+            int oid = Integer.parseInt(com[2]); //Object ID
+            this.addSprite(type, oid);
+        }
+    }
+    
+    public void setObjectProperty(String type, int oid, String key, String value) {
+        if(type == "Crab") {
+            if(this.crabs.containsKey(oid)) {
+                this.crabs.get(oid).setProperty(key, value);
+            } else {
+                
+            }
+        }
+    }
+    
+    public int addSprite(String type, int oid) {
+        if(type == "Crab") {
+            Crab crab = new Crab(oid);
+            getWorld().addObject(crab, 0, 0);
+            this.crabs.put(oid, crab);
+            return(oid);
+        } else {
+            return(-1);
+        }
     }
 }

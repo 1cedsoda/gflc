@@ -1,19 +1,22 @@
 import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
-
-/**
- * Write a description of class Crab here.
- * 
- * @author (your name) 
- * @version (a version number or a date)
- */
-public class Crab extends Actor
+public class Crab extends Sprite
 {
-    /**
-     * Act - do whatever the Crab wants to do. This method is called whenever
-     * the 'Act' or 'Run' button gets pressed in the environment.
-     */
-    public void act() 
-    {
-        // Add your action code here.
-    }    
+    public int oid;
+    public Crab(int oid) {
+        this.oid = oid;
+        this.send(-1, "ADD~Crab~"+this.oid);
+    }
+    
+    public void setProperty(String key, String value) {
+        if(key == "xy") {
+            String[] xy = value.split(";");
+            int x = Integer.parseInt(xy[0]);
+            int y = Integer.parseInt(xy[1]);
+            this.setLocation(x, y);
+        }
+        if(key == "rotation") {
+            int rotation = Integer.parseInt(value);
+            this.setRotation(rotation);
+        }
+    }
 }
