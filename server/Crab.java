@@ -1,10 +1,11 @@
+import java.util.*;
 import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
-public class Crab extends Sprite
+public class Crab extends Actor
 {
     public int oid;
     public Crab(int oid) {
         this.oid = oid;
-        this.send(-1, "ADD~Crab~"+this.oid);
+        //getWorld().getObjects(Server.class).get(0).send(-1, "ADD~Crab~"+this.oid);
     }
     
     public void setProperty(String key, String value) {

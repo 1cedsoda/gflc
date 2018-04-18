@@ -52,6 +52,8 @@ public class Server extends Actor
             if(oid >= 0) {
                 //Arrays start at 0
                 int cid = this.out.size() - 1;
+                //Krabbe bei allen Spielern adden
+                this.send(-1, "ADD~Crab~"+oid);
                 //Neuverbundenem Spieler die Rechte geben seine Krabbe zu steuern.
                 this.send(cid, "SET~Crab~"+oid+"~player~true"); 
             }
@@ -66,22 +68,27 @@ public class Server extends Actor
     /*senden von Daten an einen Stream an einem bestimmten array-index
      */
     public void send(int cid, String data) {
-        if(cid <= 0) {
-            try {
-                this.out.get(cid).writeUTF(data + "\n");
-                System.out.println(this + ": [out] " + data);
-            } catch (SocketException e) {
-                System.out.println(this + ": connection lost to client " + cid);
-            } catch (IOException e) {e.printStackTrace();}
-        } else {
-            for(int i = 0; i > this.out.size(); i++) {
+        if(cid < 0) {
+            System.out.println(data);
+            for(int i = 0; i < this.out.size(); i++) {
                 try {
                     this.out.get(i).writeUTF(data + "\n");
-                    System.out.println(this + ": [out] " + data);
+                    System.out.println(this + ": [out]["+i+"] " + data);
                 } catch (SocketException e) {
                     System.out.println(this + ": connection lost to client " + i);
-                } catch (IOException e) {e.printStackTrace();}
+                } catch (IOException e) {
+                    System.out.println("A");
+                    e.printStackTrace();}
             }
+        } else {
+            try {
+                this.out.get(cid).writeUTF(data + "\n");
+                System.out.println(this + ": [out]["+cid+"] " + data);
+            } catch (SocketException e) {
+                System.out.println(this + ": connection lost to client " + cid);
+            } catch (IOException e) {
+                System.out.println("A");
+                e.printStackTrace();}
         }
     }
     
@@ -94,12 +101,11 @@ public class Server extends Actor
                 while(this.in.get(i).ready()) {
                     data = this.in.get(i).readLine();
                     System.out.println(this + ": [in][" + i + "] " + data);
-                    this.handleMessage(data);
+                    this.handleMessage(data.substring(2));
                 }
             } catch (EOFException e) {
-                System.out.println("alright");
+                e.printStackTrace();
             } catch (IOException e) {
-                this.in.remove(i);
                 e.printStackTrace();
             }
         }
@@ -107,7 +113,7 @@ public class Server extends Actor
     
     public void handleMessage(String data) {
         String[] com = data.split("~");
-        if(com[0] == "SET") {
+        if(com[0].equals("SET")) {
             String type = com[1]; //Object class
             int oid = Integer.parseInt(com[2]); //Object ID
             String key = com[3]; //Variable name
@@ -117,7 +123,7 @@ public class Server extends Actor
     }
     
     public void setObjectProperty(String type, int oid, String key, String value) {
-        if(type == "Crab") {
+        if(type.equals("Crab")) {
             if(this.crabs.containsKey(oid)) {
                 this.crabs.get(oid).setProperty(key, value);
             }

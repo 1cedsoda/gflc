@@ -23,20 +23,24 @@ public class Client extends Actor
     }    
     
     public void connect() {
-        try {
-            this.socket = new Socket("localhost", 1223);
-            this.in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-            this.out = out;
-            this.connected = true;
-            System.out.println(this + ": connected");
-        } catch (IOException e) {
-            System.out.println(this + ": Failed to connect");
+        if(!this.connected) {
+            try {
+                this.socket = new Socket("localhost", 1223);
+                this.in = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+                DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+                this.out = out;
+                this.connected = true;
+                System.out.println(this + ": connected");
+            } catch (IOException e) {
+                System.out.println(this + ": Failed to connect");
+            }
+        } else {
+            System.out.println(this + ": Already connected");
         }
     }
     
     public void send(String data) {
-        if(this.connected) {
+        if(!this.connected) {
             try {
                 this.out.writeUTF(data + "\n");
                 System.out.println(this + ": [out] " + data);
@@ -55,7 +59,8 @@ public class Client extends Actor
                 while(this.in.ready()) {
                     data = this.in.readLine();
                     System.out.println(this + ": [in] " + data);
-                    this.handleMessage(data);
+                    this.handleMessage(data.substring(2));
+                    System.out.println("handled");
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -67,16 +72,25 @@ public class Client extends Actor
     
         public void handleMessage(String data) {
         String[] com = data.split("~");
-        if(com[0] == "SET") {
+        if(com[0].equals("SET")) {
+            System.out.println("SET");
             String type = com[1]; //Object class
             int oid = Integer.parseInt(com[2]); //Object ID
             String key = com[3]; //Variable name
             String value = com[4]; //new variable value
             this.setObjectProperty(type, oid, key, value);
-        } else if (com[0] == "ADD") {
+        } else if (com[0].equals("ADD")) {
+            System.out.println("ADD");
             String type = com[1]; //Object class
             int oid = Integer.parseInt(com[2]); //Object ID
-            this.addSprite(type, oid);
+            if(type.equals("Crab")) {
+                Crab crab = new Crab(oid);
+                getWorld().addObject(crab, 0, 0);
+                this.crabs.put(oid, crab);
+                System.out.println(this + ": Summoned crab");
+            } else {
+                System.out.println(this + ": Failed to summon object " + type);
+            }
         }
     }
     
@@ -84,20 +98,7 @@ public class Client extends Actor
         if(type == "Crab") {
             if(this.crabs.containsKey(oid)) {
                 this.crabs.get(oid).setProperty(key, value);
-            } else {
-                
             }
-        }
-    }
-    
-    public int addSprite(String type, int oid) {
-        if(type == "Crab") {
-            Crab crab = new Crab(oid);
-            getWorld().addObject(crab, 0, 0);
-            this.crabs.put(oid, crab);
-            return(oid);
-        } else {
-            return(-1);
         }
     }
 }
