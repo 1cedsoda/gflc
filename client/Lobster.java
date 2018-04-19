@@ -1,6 +1,8 @@
 import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 
-public class Crab extends Animal
+import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
+
+public class Lobster extends Animal
 {
     public boolean player = false;
     public String username = "";
@@ -10,13 +12,12 @@ public class Crab extends Animal
     public int lastY;
     public int lastRot;
     
-    public Crab(int oid) {
+    public Lobster(int oid) {
         this.oid = oid;
     }
     
     public void act() 
     {
-        this.checkKeypress();
         if(this.getX() != this.lastX) {
             this.send("SET~Crab~"+this.oid+"~xy~"+getX()+";"+getY());
             this.lastX = this.getX();
@@ -28,14 +29,13 @@ public class Crab extends Animal
             this.lastY = this.getY();
         }
         if(this.getRotation() != this.lastRot) {
-            this.send("SET~Crab~"+this.oid+"~rot~"+getRotation());
+            this.send("SET~Lobster~"+this.oid+"~rot~"+getRotation());
             this.lastRot = this.getRotation();
         }
     }
         
     public void setProperty(String key, String value) {
         if(key.equals("xy")) {
-            //System.out.println("pos");
             if(!this.player) {
                 String[] xy = value.split(";");
                 int x = Integer.parseInt(xy[0]);
@@ -43,48 +43,17 @@ public class Crab extends Animal
                 this.setLocation(x, y);
             }
         }else if(key.equals("rotation")) {
-            //System.out.println("rot");
             if(!this.player) {
                 int rotation = Integer.parseInt(value);
                 this.setRotation(rotation);
             }
-        }else if(key.equals("player")) {
-            //System.out.println("play");
-            if(value.equals("true")) {
-                this.player = true;
-            } else if(value.equals("false")) {
-                this.player = false;
-            }
         } else {
             System.out.println(this + ": failed to parse key " + key);
         }
-        
     }
     
     public void send(String data) {
         getWorld().getObjects(Client.class).get(0).send(data);
     }
-    
-    public void checkKeypress()
-    {
-        if(this.player) {
-            if(Greenfoot.isKeyDown("a")) {
-                turn(-8);
-            }
-            if(Greenfoot.isKeyDown("d"))        {
-                turn(8);
-            }
-            if ( Greenfoot.isKeyDown("w") ){   
-                turn(-90);
-                move(3);
-                turn(90);
-            }
-            if ( Greenfoot.isKeyDown("s") )
-            {
-                turn(90);
-                move(3);
-                turn(-90);
-            }
-        }
-    }
 }
+  
