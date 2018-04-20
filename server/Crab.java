@@ -5,6 +5,8 @@ public class Crab extends Animal
     public int oid;
     public int cid;
     public int lives = 3;
+    public GreenfootImage okCrab = new GreenfootImage("crab.png");
+    public GreenfootImage koCrab = new GreenfootImage("crab2.png");
         
     public Crab(int oid) {
         this.oid = oid;
@@ -19,12 +21,22 @@ public class Crab extends Animal
             int y = Integer.parseInt(xy[1]);
             this.setLocation(x, y);
             this.send(-1, "SET~Crab~"+this.oid+"~xy~"+x+";"+y);
-        }else if(key.equals("rot")) {
+        } else if(key.equals("rot")) {
             //System.out.println("rot");
             int rotation = Integer.parseInt(value);
             this.setRotation(rotation);
             this.send(-1, "SET~Crab~"+this.oid+"~rot~"+rotation);
-                } else {
+        } else if(key.equals("img")) {
+            if(value.equals("ok")) {
+                setImage(this.okCrab);
+                this.send(-1, "SET~Crab~"+this.oid+"~img~ok");
+            }
+            if(value.equals("ko")) {
+                setImage(this.koCrab);
+                this.send(-1, "SET~Crab~"+this.oid+"~img~ko");
+            }
+            
+        } else {
             System.out.println(this + ": failed to parse key " + key);
         }
     }

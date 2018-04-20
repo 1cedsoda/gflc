@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 public class Client extends Actor
 {
     public Map<Integer, Crab> crabs = new HashMap<Integer, Crab>();
+    public Map<Integer, Lobster> lobsters = new HashMap<Integer, Lobster>();
+    //public Map<Integer, Worm> worms = new HashMap<Integer, Worm>();
     public BufferedReader in;
     public DataOutputStream out;
     public Socket socket;
@@ -18,7 +20,8 @@ public class Client extends Actor
     }
     
     public void act() 
-    {
+    {       
+            if(!this.connected)this.connect();
             this.checkIncomingMessages();
     }    
     
@@ -81,11 +84,34 @@ public class Client extends Actor
             String type = com[1]; //Object class
             int oid = Integer.parseInt(com[2]); //Object ID
             if(type.equals("Crab")) {
-                Crab crab = new Crab(oid);
-                getWorld().addObject(crab, 0, 0);
-                this.crabs.put(oid, crab);
+                if(!this.crabs.containsKey(oid)) {
+                    Crab crab = new Crab(oid);
+                    getWorld().addObject(crab, 0, 0);
+                    this.crabs.put(oid, crab);
+                }
+            } else if(type.equals("Lobster")) {
+                if(!this.lobsters.containsKey(oid)) {
+                    Lobster lobster = new Lobster(oid);
+                    getWorld().addObject(lobster, 0, 0);
+                    this.lobsters.put(oid, lobster);
+                }
             } else {
                 System.out.println(this + ": Failed to summon object " + type);
+            }
+        } else if (com[0].equals("REMOVE")) {
+            String type = com[1]; //Object class
+            int oid = Integer.parseInt(com[2]); //Object ID
+            if(type.equals("Crab")) {
+                getWorld().removeObject((Actor)this.crabs.get(oid));
+                this.crabs.remove(oid);
+            }
+         } else if (com[0].equals("COLLIDE")) {
+            String type = com[1]; //Object class
+            int oid = Integer.parseInt(com[2]); //Object ID
+            String enemyType = com[3];
+            int enemyOid = Integer.parseInt(com[4]);
+            if(type.equals("Crab")) {
+                this.crabs.get(oid).collide(enemyType, enemyOid);
             }
         }
     }
@@ -94,6 +120,10 @@ public class Client extends Actor
         if(type.equals("Crab")) {
             if(this.crabs.containsKey(oid)) {
                 this.crabs.get(oid).setProperty(key, value);
+            }
+        } else if(type.equals("Lobster")) {
+            if(this.lobsters.containsKey(oid)) {
+                this.lobsters.get(oid).setProperty(key, value);
             }
         } else {
             System.out.println(this + ": Can't find class '"+type+"'");

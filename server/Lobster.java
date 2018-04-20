@@ -9,29 +9,29 @@ public class Lobster extends Animal
     
     public void act() 
     {
-        //if (canSee(Crab.class)) {
-            //Actor actor = getOneObjectAtOffset(0, 0, Crab.class);
-            //If 
-            //this.send(-1, "COLLIDE~Lobster~"+this.oid+"~Crab~"+crab.oid);
-        //}
+        if (canSee(Crab.class)) {
+            Actor actor = getOneObjectAtOffset(0, 0, Crab.class);
+            if(actor instanceof Crab) {
+                Crab crab = (Crab) actor;
+                this.send(-1, "COLLIDE~Crab~"+crab.oid+"~Lobster~"+this.oid);
+            }
+        }
         if (atWorldEdge()) {
-            turn(180);
+            turn(Greenfoot.getRandomNumber(60)-30);
         }
-
-        if ( Greenfoot.getRandomNumber(100) < 10 ) 
+        if ( Greenfoot.getRandomNumber(100) < 5 ) 
         {
-            turn( Greenfoot.getRandomNumber(60)-30 );
+            turn(Greenfoot.getRandomNumber(60)-30 );
         }
-        if ( Greenfoot.getRandomNumber(100) < 80 )
-            move(2);
-            
+        //if ( Greenfoot.getRandomNumber(100) < 80 )
+            move(3);    
         if(this.getX() != this.lastX) {
-            this.send(-1, "SET~Crab~"+this.oid+"~xy~"+getX()+";"+getY());
+            this.send(-1, "SET~Lobster~"+this.oid+"~xy~"+getX()+";"+getY());
             this.lastX = this.getX();
             this.lastY = this.getY();
         }
         if(this.getY() != this.lastY) {
-            this.send(-1, "SET~Crab~"+this.oid+"~xy~"+getX()+";"+getY());
+            this.send(-1, "SET~Lobster~"+this.oid+"~xy~"+getX()+";"+getY());
             this.lastX = this.getX();
             this.lastY = this.getY();
         }
@@ -69,8 +69,8 @@ public class Lobster extends Animal
     }
     
     public void sendAllProperties() {
-        this.send(-1, "ADD~Crab~"+this.oid);
-        this.send(-1, "SET~Crab~"+this.oid+"~xy~"+getX()+";"+getY());
-        this.send(-1, "SET~Crab~"+this.oid+"~rot~"+getRotation());
+        this.send(-1, "ADD~Lobster~"+this.oid);
+        this.send(-1, "SET~Lobster~"+this.oid+"~xy~"+getX()+";"+getY());
+        this.send(-1, "SET~Lobster~"+this.oid+"~rot~"+getRotation());
     }
 }

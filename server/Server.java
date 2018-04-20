@@ -7,6 +7,7 @@ import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 public class Server extends Actor
 { 
     //Class Maps
+    public Map<Integer, Integer> players = new HashMap<Integer, Integer>();
     public Map<Integer, Crab> crabs = new HashMap<Integer, Crab>();
     public Map<Integer, Worm> worms = new HashMap<Integer, Worm>();
     public Map<Integer, Lobster> lobsters = new HashMap<Integer, Lobster>();
@@ -15,6 +16,7 @@ public class Server extends Actor
     public List<DataOutputStream> out = new ArrayList<>();
     public Acceptor acceptor;
     public boolean acceptorRunning = false;
+    public boolean worldInitalized = false;
     public int port;
     public int nextoid = 0;
     
@@ -29,11 +31,16 @@ public class Server extends Actor
      */
     public void act() {
         if (!this.acceptorRunning) {this.startAcceptor();} //der connection listener wird einmal gestartet
+        if (!this.worldInitalized) {this.init();}
         this.checkIncomingMessages();
     }
     
     public void init() {
-        int oid = this.addSprite("Lobster");
+        this.worldInitalized = true;
+        for(int i = 0; i < 10; i++) {
+            int oid = this.addSprite("Lobster");
+            this.lobsters.get(oid).sendAllProperties();
+        }
     }
     
     /* Started den Thread, welcher die Verbindungsanfragen annimmt.
@@ -63,6 +70,7 @@ public class Server extends Actor
             int cid = this.out.size() - 1;
             int oid = this.addSprite("Crab");
             this.crabs.get(oid).cid = cid;
+            this.players.put(cid, oid);
             //Wenn die Krabbe erfolgreich erzeugt wurde
             if(cid != -1) {
                 int totalcrabs = this.crabs.size();
@@ -79,16 +87,24 @@ public class Server extends Actor
                 int totalworms = this.worms.size();
                 int wormsdone = 0;
                 int wormsindex = 0;
-                while(wormsdone < totalcrabs) {
+                while(wormsdone < totalworms) {
                     if(this.worms.containsKey(wormsindex)) {
                         wormsdone++;
                         this.worms.get(wormsindex).sendAllProperties();
                         }
                     wormsindex++;
                 }
-                //for(int i = 0; i < this.lobsters.size(); i++) {
-                    //this.lobsters.get(i).sendAllProperties();
-                //}
+                
+                int totallobsters = this.lobsters.size();
+                int lobstersdone = 0;
+                int lobstersindex = 0;
+                while(lobstersdone < totallobsters) {
+                    if(this.lobsters.containsKey(lobstersindex)) {
+                        lobstersdone++;
+                        this.lobsters.get(lobstersindex).sendAllProperties();
+                        }
+                    lobstersindex++;
+                }
                 this.send(cid, "SET~Crab~"+oid+"~player~true"); 
             }
     }
@@ -174,23 +190,32 @@ public class Server extends Actor
         if(type.equals("Crab")) {
             int oid = newOID();
             Crab crab = new Crab(oid);
-            getWorld().addObject(crab, 0, 0);
+            getWorld().addObject(crab, Greenfoot.getRandomNumber(1200), Greenfoot.getRandomNumber(400));
             this.crabs.put(oid, crab);
             return(oid);
         } else if(type.equals("Lobster")) {
             int oid = newOID();
             Lobster lobster = new Lobster(oid);
-            getWorld().addObject(lobster, 0, 0);
+            getWorld().addObject(lobster, Greenfoot.getRandomNumber(1200), Greenfoot.getRandomNumber(400));
             this.lobsters.put(oid, lobster);
             return(oid);
         } else if(type.equals("Worm")) {
             int oid = newOID();
             Worm worm = new Worm(oid);
-            getWorld().addObject(worm, 0, 0);
+            getWorld().addObject(worm, Greenfoot.getRandomNumber(1200), Greenfoot.getRandomNumber(400));
             this.worms.put(oid, worm);
             return(oid);
         } else {
             return(-1);
         }
+    }
+    
+    public void removeClient(int cid) {
+        int oid = this.players.get(cid);
+        System.out.println(this.in.size());
+        this.in.set(cid, null);
+        this.out.set(cid, null);
+        System.out.println(this.in.size());
+        this.send(-1, "REMOVE~Crab~"+oid);
     }
 }

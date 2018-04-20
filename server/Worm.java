@@ -15,12 +15,12 @@ public class Worm extends Animal
             int x = Integer.parseInt(xy[0]);
             int y = Integer.parseInt(xy[1]);
             this.setLocation(x, y);
-            this.send(-1, "SET~Crab~"+this.oid+"~xy~"+x+";"+y);
+            this.send(-1, "SET~Worm~"+this.oid+"~xy~"+x+";"+y);
         }else if(key.equals("rot")) {
             //System.out.println("rot");
             int rotation = Integer.parseInt(value);
             this.setRotation(rotation);
-            this.send(-1, "SET~Crab~"+this.oid+"~rot~"+rotation);
+            this.send(-1, "SET~Worm~"+this.oid+"~rot~"+rotation);
                 } else {
             System.out.println(this + ": failed to parse key " + key);
         }
