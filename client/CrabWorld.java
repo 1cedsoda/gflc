@@ -10,6 +10,6 @@ public class CrabWorld extends World
 
     public void prepare(){
         Client client = new Client();
-        addObject(client,113,93);
+        addObject(client,0,0);
     }
 }

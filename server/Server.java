@@ -41,6 +41,10 @@ public class Server extends Actor
             int oid = this.addSprite("Lobster");
             this.lobsters.get(oid).sendAllProperties();
         }
+        for(int i = 0; i < 10; i++) {
+            int oid = this.addSprite("Worm");
+            this.worms.get(oid).sendAllProperties();
+        }
     }
     
     /* Started den Thread, welcher die Verbindungsanfragen annimmt.
@@ -67,46 +71,47 @@ public class Server extends Actor
     
     public void initClient() {
         //Krabbe erzeugen
-            int cid = this.out.size() - 1;
-            int oid = this.addSprite("Crab");
-            this.crabs.get(oid).cid = cid;
-            this.players.put(cid, oid);
-            //Wenn die Krabbe erfolgreich erzeugt wurde
-            if(cid != -1) {
-                int totalcrabs = this.crabs.size();
-                int crabsdone = 0;
-                int crabsindex = 0;
-                while(crabsdone < totalcrabs) {
-                    if(this.crabs.containsKey(crabsindex)) {
-                        crabsdone++;
-                        this.crabs.get(crabsindex).sendAllProperties();
-                        }
-                    crabsindex++;
-                }
-                
-                int totalworms = this.worms.size();
-                int wormsdone = 0;
-                int wormsindex = 0;
-                while(wormsdone < totalworms) {
-                    if(this.worms.containsKey(wormsindex)) {
-                        wormsdone++;
-                        this.worms.get(wormsindex).sendAllProperties();
-                        }
-                    wormsindex++;
-                }
-                
-                int totallobsters = this.lobsters.size();
-                int lobstersdone = 0;
-                int lobstersindex = 0;
-                while(lobstersdone < totallobsters) {
-                    if(this.lobsters.containsKey(lobstersindex)) {
-                        lobstersdone++;
-                        this.lobsters.get(lobstersindex).sendAllProperties();
-                        }
-                    lobstersindex++;
-                }
-                this.send(cid, "SET~Crab~"+oid+"~player~true"); 
+        int cid = this.out.size() - 1;
+        int oid = this.addSprite("Crab");
+        this.crabs.get(oid).cid = cid;
+        this.crabs.get(oid).initText();
+        this.players.put(cid, oid);
+        //Wenn die Krabbe erfolgreich erzeugt wurde
+        if(cid != -1) {
+            int totalcrabs = this.crabs.size();
+            int crabsdone = 0;
+            int crabsindex = 0;
+            while(crabsdone < totalcrabs) {
+                if(this.crabs.containsKey(crabsindex)) {
+                    crabsdone++;
+                    this.crabs.get(crabsindex).sendAllProperties();
+                    }
+                crabsindex++;
             }
+            
+            int totalworms = this.worms.size();
+            int wormsdone = 0;
+            int wormsindex = 0;
+            while(wormsdone < totalworms) {
+                if(this.worms.containsKey(wormsindex)) {
+                    wormsdone++;
+                    this.worms.get(wormsindex).sendAllProperties();
+                    }
+                wormsindex++;
+            }
+            
+            int totallobsters = this.lobsters.size();
+            int lobstersdone = 0;
+            int lobstersindex = 0;
+            while(lobstersdone < totallobsters) {
+                if(this.lobsters.containsKey(lobstersindex)) {
+                    lobstersdone++;
+                    this.lobsters.get(lobstersindex).sendAllProperties();
+                    }
+                lobstersindex++;
+            }
+            this.send(cid, "SET~Crab~"+oid+"~player~true"); 
+        }
     }
     
     public int newOID() {
@@ -119,24 +124,26 @@ public class Server extends Actor
     public void send(int cid, String data) {
         if(cid < 0) {
             for(int i = 0; i < this.out.size(); i++) {
-                    try {
-                        this.out.get(i).writeUTF(data + "\n");
-                        System.out.println(this + ": [out]["+i+"] " + data);
-                    } catch (SocketException e) {
-                        System.out.println(this + ": connection lost to client " + i);
-                    } catch (IOException e) {
-                        System.out.println("A");
-                        e.printStackTrace();}
+                try {
+                    this.out.get(i).writeUTF(data + "\n");
+                    System.out.println(this + ": [out]["+i+"] " + data);
+                } catch (SocketException e) {
+                    System.out.println(this + ": connection lost to client " + i);
+                } catch (IOException e) {
+                    System.out.println("A");
+                    e.printStackTrace();
+                }
             }
         } else {
             try {
                 this.out.get(cid).writeUTF(data + "\n");
                 System.out.println(this + ": [out]["+cid+"] " + data);
             } catch (SocketException e) {
-                System.out.println(this + ": connection lost to client " + cid);
+                //System.out.println(this + ": connection lost to client " + cid);
             } catch (IOException e) {
                 System.out.println("A");
-                e.printStackTrace();}
+                e.printStackTrace();
+            }
         }
     }
     
@@ -181,7 +188,7 @@ public class Server extends Actor
             }
         } else if(type.equals("Worm")) {
             if(this.worms.containsKey(oid)) {
-                //this.worms.get(oid).setProperty(key, value);
+                this.worms.get(oid).setProperty(key, value);
             }
         }
     }
@@ -212,10 +219,9 @@ public class Server extends Actor
     
     public void removeClient(int cid) {
         int oid = this.players.get(cid);
-        System.out.println(this.in.size());
-        this.in.set(cid, null);
-        this.out.set(cid, null);
-        System.out.println(this.in.size());
         this.send(-1, "REMOVE~Crab~"+oid);
+        this.players.remove(cid);
+        getWorld().removeObject(this.crabs.get(oid).textField);
+        getWorld().removeObject(this.crabs.get(oid));
     }
 }

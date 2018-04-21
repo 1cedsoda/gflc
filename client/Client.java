@@ -8,7 +8,7 @@ public class Client extends Actor
 {
     public Map<Integer, Crab> crabs = new HashMap<Integer, Crab>();
     public Map<Integer, Lobster> lobsters = new HashMap<Integer, Lobster>();
-    //public Map<Integer, Worm> worms = new HashMap<Integer, Worm>();
+    public Map<Integer, Worm> worms = new HashMap<Integer, Worm>();
     public BufferedReader in;
     public DataOutputStream out;
     public Socket socket;
@@ -87,6 +87,7 @@ public class Client extends Actor
                 if(!this.crabs.containsKey(oid)) {
                     Crab crab = new Crab(oid);
                     getWorld().addObject(crab, 0, 0);
+                    crab.initText();
                     this.crabs.put(oid, crab);
                 }
             } else if(type.equals("Lobster")) {
@@ -95,6 +96,12 @@ public class Client extends Actor
                     getWorld().addObject(lobster, 0, 0);
                     this.lobsters.put(oid, lobster);
                 }
+            } else if(type.equals("Worm")) {
+                if(!this.worms.containsKey(oid)) {
+                    Worm worm = new Worm(oid);
+                    getWorld().addObject(worm, 0, 0);
+                    this.worms.put(oid, worm);
+                }
             } else {
                 System.out.println(this + ": Failed to summon object " + type);
             }
@@ -102,8 +109,29 @@ public class Client extends Actor
             String type = com[1]; //Object class
             int oid = Integer.parseInt(com[2]); //Object ID
             if(type.equals("Crab")) {
+                Crab crab = this.crabs.get(oid);
+                getWorld().removeObject((Actor)this.crabs.get(oid).textField);
                 getWorld().removeObject((Actor)this.crabs.get(oid));
                 this.crabs.remove(oid);
+                if(crab.player) {
+                    System.out.println("GAME OVER");
+                    getWorld().removeObjects(getWorld().getObjects(Crab.class));
+                    getWorld().removeObjects(getWorld().getObjects(Text.class));
+                    getWorld().removeObjects(getWorld().getObjects(Lobster.class));
+                    getWorld().removeObjects(getWorld().getObjects(Worm.class));
+                    GameOver go = new GameOver();
+                    getWorld().addObject(go, 600, 200);
+                    try {
+                        Thread.sleep(3000);
+                    } catch(Exception e) {}
+                    System.exit(1);
+                }
+            } else if(type.equals("Lobster")) {
+                getWorld().removeObject((Actor)this.lobsters.get(oid));
+                this.lobsters.remove(oid);
+            } else if(type.equals("Worm")) {
+                getWorld().removeObject((Actor)this.worms.get(oid));
+                this.worms.remove(oid);
             }
          } else if (com[0].equals("COLLIDE")) {
             String type = com[1]; //Object class
@@ -111,7 +139,11 @@ public class Client extends Actor
             String enemyType = com[3];
             int enemyOid = Integer.parseInt(com[4]);
             if(type.equals("Crab")) {
-                this.crabs.get(oid).collide(enemyType, enemyOid);
+                try {
+                    this.crabs.get(oid).collide(enemyType, enemyOid);
+                } catch(Exception e) {
+                    System.out.println(this + ": collision failure");
+                }
             }
         }
     }
@@ -124,6 +156,10 @@ public class Client extends Actor
         } else if(type.equals("Lobster")) {
             if(this.lobsters.containsKey(oid)) {
                 this.lobsters.get(oid).setProperty(key, value);
+            }
+        } else if(type.equals("Worm")) {
+            if(this.worms.containsKey(oid)) {
+                this.worms.get(oid).setProperty(key, value);
             }
         } else {
             System.out.println(this + ": Can't find class '"+type+"'");
