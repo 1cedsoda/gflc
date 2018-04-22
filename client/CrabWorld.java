@@ -9,7 +9,9 @@ public class CrabWorld extends World
     }
 
     public void prepare(){
-        Client client = new Client();
-        addObject(client,0,0);
+        Keyboard kb = new Keyboard();
+        addObject(kb, 600, 300);
+        DynamicText dt = new DynamicText("                                          press RUN & connect to a server                                          ");
+        addObject(dt, 600, 220);
     }
 }

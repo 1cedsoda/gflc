@@ -6,14 +6,28 @@ public class Lobster extends Animal
     public int lastX;
     public int lastY;
     public int lastRot;
+    public long lastHit = System.currentTimeMillis() + 2000;
+    public GreenfootImage okLobster = new GreenfootImage("lobster.png");
+    public GreenfootImage koLobster = new GreenfootImage("lobster2.png");
+    public String image = "ok";
+    public String lastimage = "ok";
     
     public void act() 
     {
-        if (canSee(Crab.class)) {
+        if(!this.lastimage.equals(this.image)){
+            this.send(-1, "SET~Lobster~"+this.oid+"~image~"+this.image);
+            this.lastimage = image;
+        }
+        if(this.lastHitDifference() > 2 || this.image.equals("ko")) {
+            this.image = "ok";
+        }
+        if(canSee(Crab.class)) {
             Actor actor = getOneObjectAtOffset(0, 0, Crab.class);
             if(actor instanceof Crab) {
                 Crab crab = (Crab) actor;
-                this.send(-1, "COLLIDE~Crab~"+crab.oid+"~Lobster~"+this.oid);
+                if(!crab.rushing) {
+                    this.send(-1, "COLLIDE~Crab~"+crab.oid+"~Lobster~"+this.oid);
+                }
             }
         }
         if (atWorldEdge()) {
@@ -48,18 +62,16 @@ public class Lobster extends Animal
     
     public void setProperty(String key, String value) {
         if(key.equals("xy")) {
-            //System.out.println("pos");
             String[] xy = value.split(";");
             int x = Integer.parseInt(xy[0]);
             int y = Integer.parseInt(xy[1]);
             this.setLocation(x, y);
             this.send(-1, "SET~Lobster~"+this.oid+"~xy~"+x+";"+y);
         }else if(key.equals("rot")) {
-            //System.out.println("rot");
             int rotation = Integer.parseInt(value);
             this.setRotation(rotation);
             this.send(-1, "SET~Lobster~"+this.oid+"~rot~"+rotation);
-                } else {
+        } else {
             System.out.println(this + ": failed to parse key " + key);
         }
     }
@@ -72,5 +84,17 @@ public class Lobster extends Animal
         this.send(-1, "ADD~Lobster~"+this.oid);
         this.send(-1, "SET~Lobster~"+this.oid+"~xy~"+getX()+";"+getY());
         this.send(-1, "SET~Lobster~"+this.oid+"~rot~"+getRotation());
+    }
+    
+    public void collide() {
+        this.lastHit = System.currentTimeMillis();
+        this.image = "ko";
+        this.setImage(this.koLobster);
+    }
+    
+    public long lastHitDifference() {
+        long lastHitInSeconds = this.lastHit / 1000;
+        long timeInSeconds = System.currentTimeMillis() / 1000;
+        return(timeInSeconds - lastHitInSeconds);
     }
 }

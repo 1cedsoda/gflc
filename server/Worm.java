@@ -5,6 +5,7 @@ public class Worm extends Animal
     public int oid;
     public int lastX;
     public int lastY;
+    public String effect = "normal";
     
     public void act() 
     {
@@ -36,7 +37,8 @@ public class Worm extends Animal
         }
     }
     
-    public Worm(int oid) {
+    public Worm(int oid, String effect) {
+        this.setEffect(effect);
         this.oid = oid;
         //this.send(-1, "ADD~Crab~"+this.oid);
     }
@@ -55,12 +57,39 @@ public class Worm extends Animal
     }
     
     public void send(int cid, String data) {
-        getWorld().getObjects(Server.class).get(0).send(cid, data);
+        try{
+            getWorld().getObjects(Server.class).get(0).send(cid, data);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(data);
+        }
     }
     
     public void sendAllProperties() {
         this.send(-1, "ADD~Worm~"+this.oid);
         this.send(-1, "SET~Worm~"+this.oid+"~xy~"+getX()+";"+getY());
+        this.send(-1, "SET~Worm~"+this.oid+"~effect~"+this.effect);
+    }
+    
+    public void setEffect(String effect) {
+        if(effect.equals("normal")) {
+            this.effect = "normal";
+            this.setImage(new GreenfootImage("worm.png"));
+        } else if(effect.equals("bomb")) {
+            this.effect = "bomb";
+            this.setImage(new GreenfootImage("worm-bomb.png"));
+        } else if(effect.equals("energy")) {
+            this.effect = "energy";
+            this.setImage(new GreenfootImage("worm-energy.png"));
+        } else if(effect.equals("blood")) {
+            this.effect = "blood";
+            this.setImage(new GreenfootImage("worm-blood.png"));
+        } else if(effect.equals("plus")) {
+            this.effect = "plus";
+            this.setImage(new GreenfootImage("worm-plus.png"));
+        }else {
+            System.out.println(this + ": unknown effect");
+        }
     }
 }
 

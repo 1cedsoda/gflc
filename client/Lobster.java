@@ -5,7 +5,8 @@ import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 public class Lobster extends Animal
 {
     public int oid;
-    
+    public GreenfootImage okLobster = new GreenfootImage("lobster.png");
+    public GreenfootImage koLobster = new GreenfootImage("lobster2.png");
     public Lobster(int oid) {
         this.oid = oid;
     }
@@ -20,9 +21,15 @@ public class Lobster extends Animal
                 int x = Integer.parseInt(xy[0]);
                 int y = Integer.parseInt(xy[1]);
                 this.setLocation(x, y);
-        }else if(key.equals("rot")) {
+        } else if(key.equals("rot")) {
                 int rotation = Integer.parseInt(value);
                 this.setRotation(rotation);
+        } else if(key.equals("image")) {
+                if(value.equals("ok")) {
+                    setImage(this.okLobster);
+                } else  if(value.equals("ko")) {
+                    setImage(this.koLobster);
+                }
         } else {
             System.out.println(this + ": failed to parse key " + key);
         }

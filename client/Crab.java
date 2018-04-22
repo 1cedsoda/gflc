@@ -5,11 +5,11 @@ public class Crab extends Animal
     public boolean player = false;
     public String username = "";
     public int oid;
-    public int lives = 5;
+    public int lifes = 5;
     public int lastX;
     public int lastY;
     public int lastRot;
-    public int lastLives = 6;
+    public int lastLifes = 6;
     public int points;
     public String lastImage = "ok";
     public long lastHit = System.currentTimeMillis() - 3000; //Kein Schaden in den ersten 5 Sekunden
@@ -18,6 +18,9 @@ public class Crab extends Animal
     public Text textField;
     public boolean textFieldExcists = false;
     public String color = "black";
+    public int rush = 0;
+    public int lastRush = 0;
+    public boolean rushing = false;
     
     public Crab(int oid) {
         this.oid = oid;
@@ -25,6 +28,24 @@ public class Crab extends Animal
     
     public void act()
     {
+        if (canSee(Crab.class) && this.rushing) {
+            Actor actor = getOneObjectAtOffset(0, 0, Crab.class);
+            if(actor instanceof Crab) {
+                Crab crab = (Crab) actor;
+                if(crab.oid != this.oid) {
+                    this.send("COLLIDE~Crab~"+crab.oid+"~Crab~"+this.oid);
+                }
+            }
+        }
+        if (canSee(Lobster.class) && this.rushing) {
+            Actor actor = getOneObjectAtOffset(0, 0, Lobster.class);
+            if(actor instanceof Lobster) {
+                Lobster lobster = (Lobster) actor;
+                if(lobster.oid != this.oid) {
+                    this.send("COLLIDE~Lobster~"+lobster.oid+"~Crab~"+this.oid);
+                }
+            }
+        }
         if(this.player) {
             if(this.lastHitDifference() > 2) {
                 setImage(this.okCrab);
@@ -34,9 +55,9 @@ public class Crab extends Animal
                 }
                 this.checkKeypress();
             }
-            if(this.lives != this.lastLives) {
-                this.send("SET~Crab~"+this.oid+"~lives~"+this.lives);
-                this.lastLives = this.lives;
+            if(this.lifes != this.lastLifes) {
+                this.send("SET~Crab~"+this.oid+"~lifes~"+this.lifes);
+                this.lastLifes = this.lifes;
             }
             if(this.getX() != this.lastX) {
                 this.send("SET~Crab~"+this.oid+"~xy~"+getX()+";"+getY());
@@ -52,14 +73,17 @@ public class Crab extends Animal
                 this.send("SET~Crab~"+this.oid+"~rot~"+getRotation());
                 this.lastRot = this.getRotation();
             }
+            if(this.rush != this.lastRush) {
+                this.send("SET~Crab~"+this.oid+"~rush~"+this.rush);
+                this.lastRush = this.rush;
+            }
         }
-        this.textField.text(this.points + " Points " + this.lives + " Lives");
+        this.textField.text(this.points + " Points " + this.lifes + " Lifes");
         this.textField.hoverPosition(getX(), getY());
     }
         
     public void setProperty(String key, String value) {
         if(key.equals("xy")) {
-            //System.out.println("pos");
             if(!this.player) {
                 String[] xy = value.split(";");
                 int x = Integer.parseInt(xy[0]);
@@ -80,14 +104,22 @@ public class Crab extends Animal
                     setImage(this.koCrab);
                 }
             }
-        }else if(key.equals("lives")) {
+        }else if(key.equals("lifes")) {
             if(!this.player) {
-                int lives = Integer.parseInt(value);
-                this.lives = lives;
+                int lifes = Integer.parseInt(value);
+                this.lifes = lifes;
             }
         } else if(key.equals("points")) {
             int points = Integer.parseInt(value);
             this.points = points;
+        } else if(key.equals("addlife")) {
+            this.lifes += Integer.parseInt(value);
+        } else if(key.equals("addrush")) {
+            this.rush += Integer.parseInt(value);
+        } else if(key.equals("rush")) {
+            this.rush = Integer.parseInt(value);
+        } else if(key.equals("hit")) {
+            this.collide();
         } else if(key.equals("player")) {
             if(value.equals("true")) {
                 this.player = true;
@@ -108,32 +140,50 @@ public class Crab extends Animal
     
     public void checkKeypress()
     {
-        if(Greenfoot.isKeyDown("a")) {
-            turn(-6);
+        if(Greenfoot.isKeyDown("space")) {
+            if(this.rush > 0 && !this.rushing) {
+                this.rush--;
+                this.rushing = true;
+                this.send("SET~Crab~"+this.oid+"~rushing~true");
+            }
         }
-        if(Greenfoot.isKeyDown("d"))        {
-            turn(6);
-        }
-        if ( Greenfoot.isKeyDown("w") ){   
-            turn(-90);
-            move(3);
-            turn(90);
-        }
-        if ( Greenfoot.isKeyDown("s") )
-        {
-            turn(90);
-            move(3);
-            turn(-90);
+        if(!this.rushing) {
+            if(Greenfoot.isKeyDown("a")) {
+                turn(-6);
+            }
+            if(Greenfoot.isKeyDown("d")) {
+                turn(6);
+            }
+            if ( Greenfoot.isKeyDown("w") ){   
+                turn(-90);
+                move(3);
+                turn(90);
+            }
+            if ( Greenfoot.isKeyDown("s") )
+            {
+                turn(90);
+                move(3);
+                turn(-90);
+            }
+        } else {
+            if(!atWorldEdge()) {
+                turn(-90);
+                move(15);
+                turn(90);
+            } else {
+                rushing = false;
+                this.send("SET~Crab~"+this.oid+"~rushing~false");
+            }
         }
     }
     
-    public void collide(String enemyType, int enemyOid) {
+    public void collide() {
         if(this.lastHitDifference() > 2) {
             setImage(this.koCrab);
             if(!this.lastImage.equals("ko")) {
                 this.send("SET~Crab~"+this.oid+"~img~ko");
                 this.lastImage = "ko";
-                this.lives--;
+                this.lifes--;
             }
             this.lastHit = System.currentTimeMillis();
         }

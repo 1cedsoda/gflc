@@ -11,6 +11,7 @@ public class Server extends Actor
     public Map<Integer, Crab> crabs = new HashMap<Integer, Crab>();
     public Map<Integer, Worm> worms = new HashMap<Integer, Worm>();
     public Map<Integer, Lobster> lobsters = new HashMap<Integer, Lobster>();
+    public Map<Integer, Bomb> bombs = new HashMap<Integer, Bomb>();
     
     public List<BufferedReader> in = new ArrayList<>();
     public List<DataOutputStream> out = new ArrayList<>();
@@ -41,7 +42,7 @@ public class Server extends Actor
             int oid = this.addSprite("Lobster");
             this.lobsters.get(oid).sendAllProperties();
         }
-        for(int i = 0; i < 10; i++) {
+        for(int i = 0; i < 15; i++) {
             int oid = this.addSprite("Worm");
             this.worms.get(oid).sendAllProperties();
         }
@@ -110,6 +111,17 @@ public class Server extends Actor
                     }
                 lobstersindex++;
             }
+            
+            int totalbombs = this.bombs.size();
+            int bombsdone = 0;
+            int bombsindex = 0;
+            while(bombsdone < totalbombs) {
+                if(this.bombs.containsKey(bombsindex)) {
+                    bombsdone++;
+                    this.bombs.get(bombsindex).sendAllProperties();
+                    }
+                bombsindex++;
+            }
             this.send(cid, "SET~Crab~"+oid+"~player~true"); 
         }
     }
@@ -174,6 +186,21 @@ public class Server extends Actor
             String key = com[3]; //Variable name
             String value = com[4]; //new variable value
             this.setObjectProperty(type, oid, key, value);
+        } else if(com[0].equals("COLLIDE")) {
+            String type = com[1]; //Object class
+            int oid = Integer.parseInt(com[2]); //Object ID
+            String enemyType = com[3];
+            int enemyOid = Integer.parseInt(com[4]);
+            if(type.equals("Crab")) {
+                try {
+                    this.send(-1, "SET~Crab~"+oid+"~hit~1");
+                } catch(Exception e) {
+                    System.out.println(this + ": collision failure");
+                }
+            } else if(type.equals("Lobster")) {
+                Lobster lobster = this.lobsters.get(oid);
+                lobster.collide();
+            }
         }
     }
     
@@ -208,9 +235,29 @@ public class Server extends Actor
             return(oid);
         } else if(type.equals("Worm")) {
             int oid = newOID();
-            Worm worm = new Worm(oid);
+            String effect = "normal";
+            int random1 = Greenfoot.getRandomNumber(100);
+            int random2 = Greenfoot.getRandomNumber(5);
+            if(random1 < 70) {
+                if(random2 == 1) {
+                    effect = "energy";
+                } else if (random2 == 2) {
+                    effect = "blood";
+                } else if (random2 == 3) {
+                    effect = "bomb";
+                } else if (random2 == 4) {
+                    effect = "plus";
+                }
+            }
+            Worm worm = new Worm(oid, effect);
             getWorld().addObject(worm, Greenfoot.getRandomNumber(1200), Greenfoot.getRandomNumber(400));
             this.worms.put(oid, worm);
+            return(oid);
+        }if(type.equals("Bomb")) {
+            int oid = newOID();
+            Bomb bomb = new Bomb(oid);
+            getWorld().addObject(bomb, Greenfoot.getRandomNumber(1200), Greenfoot.getRandomNumber(400));
+            this.bombs.put(oid, bomb);
             return(oid);
         } else {
             return(-1);
