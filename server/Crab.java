@@ -9,6 +9,7 @@ public class Crab extends Animal
     public GreenfootImage koCrab = new GreenfootImage("crab2.png");
     public Text textField;
     public int points;
+    public String color;
         
     public Crab(int oid) {
         this.oid = oid;
@@ -20,6 +21,7 @@ public class Crab extends Animal
             if(actor instanceof Worm) {
                 Worm worm = (Worm) actor;
                 int oid = worm.oid;
+                this.points++;
                 this.send(-1, "SET~Crab~"+this.oid+"~points~"+this.points);
                 this.send(-1, "REMOVE~Worm~"+oid);
                 Server server = getWorld().getObjects(Server.class).get(0);
@@ -37,7 +39,7 @@ public class Crab extends Animal
             int x = Integer.parseInt(xy[0]);
             int y = Integer.parseInt(xy[1]);
             this.setLocation(x, y);
-            this.textField.text(this.lives + " Lives");
+            this.textField.text(this.points +" Points " + this.lives + " Lives");
             this.textField.hoverPosition(getX(), getY());
             this.send(-1, "SET~Crab~"+this.oid+"~xy~"+x+";"+y);
         } else if(key.equals("rot")) {
@@ -61,6 +63,8 @@ public class Crab extends Animal
             if(this.lives == 0) {
                 getWorld().getObjects(Server.class).get(0).removeClient(this.cid);
             }
+        } else if(key.equals("color")) {
+            this.color = value;
         } else {
             System.out.println(this + ": failed to parse key " + key);
         }
@@ -76,7 +80,9 @@ public class Crab extends Animal
         this.send(-1, "SET~Crab~"+this.oid+"~xy~"+getX()+";"+getY());
         this.send(-1, "SET~Crab~"+this.oid+"~rot~"+getRotation());
         this.send(-1, "SET~Crab~"+this.oid+"~lives~"+this.lives);
-    } catch (Exception e) {}
+        this.send(-1, "SET~Crab~"+this.oid+"~points~"+this.points);
+        this.send(-1, "SET~Crab~"+this.oid+"~color~"+this.color);
+        } catch (Exception e) {}
     }
     
     public void gettingAHit(String pType, int pOid) {
@@ -84,8 +90,10 @@ public class Crab extends Animal
         this.send(-1, "SET~Crab~"+this.oid+"~lives~"+this.lives); 
     }
     
-    public void initText() {
-        this.textField = new Text();
+    public void initText(String color) {
+        this.color = color;
+        this.textField = new Text(this);
         getWorld().addObject(this.textField, 0, 0);
     }
+    
 }

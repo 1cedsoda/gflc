@@ -17,6 +17,7 @@ public class Crab extends Animal
     public GreenfootImage koCrab = new GreenfootImage("crab2.png");
     public Text textField;
     public boolean textFieldExcists = false;
+    public String color = "black";
     
     public Crab(int oid) {
         this.oid = oid;
@@ -52,7 +53,7 @@ public class Crab extends Animal
                 this.lastRot = this.getRotation();
             }
         }
-        this.textField.text(this.lives + " Lives");
+        this.textField.text(this.points + " Points " + this.lives + " Lives");
         this.textField.hoverPosition(getX(), getY());
     }
         
@@ -93,6 +94,8 @@ public class Crab extends Animal
             } else if(value.equals("false")) {
                 this.player = false;
             }
+        } else if(key.equals("color")) {
+            this.color = value;
         } else {
             System.out.println(this + ": failed to parse key " + key);
         }
@@ -143,7 +146,7 @@ public class Crab extends Animal
     }
     
     public void initText() {
-        this.textField = new Text();
+        this.textField = new Text(this);
         getWorld().addObject(this.textField, 0, 0);
     }
 }

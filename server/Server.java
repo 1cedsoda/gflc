@@ -74,7 +74,7 @@ public class Server extends Actor
         int cid = this.out.size() - 1;
         int oid = this.addSprite("Crab");
         this.crabs.get(oid).cid = cid;
-        this.crabs.get(oid).initText();
+        this.crabs.get(oid).initText(this.randomColor());
         this.players.put(cid, oid);
         //Wenn die Krabbe erfolgreich erzeugt wurde
         if(cid != -1) {
@@ -128,7 +128,7 @@ public class Server extends Actor
                     this.out.get(i).writeUTF(data + "\n");
                     System.out.println(this + ": [out]["+i+"] " + data);
                 } catch (SocketException e) {
-                    System.out.println(this + ": connection lost to client " + i);
+                    //System.out.println(this + ": connection lost to client " + i);
                 } catch (IOException e) {
                     System.out.println("A");
                     e.printStackTrace();
@@ -223,5 +223,16 @@ public class Server extends Actor
         this.players.remove(cid);
         getWorld().removeObject(this.crabs.get(oid).textField);
         getWorld().removeObject(this.crabs.get(oid));
+    }
+    
+    public String randomColor() {
+        List<String> colors = new ArrayList<>();
+        colors.add("black");
+        colors.add("blue");
+        colors.add("red");
+        colors.add("green");
+        colors.add("yellow");
+        int random = Greenfoot.getRandomNumber(colors.size());
+        return(colors.get(random));
     }
 }
