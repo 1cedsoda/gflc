@@ -6,7 +6,8 @@ public class Text extends Animal
     public Color fontcolor;
     public Text(Crab crab) {
         this.crab = crab;
-        if(this.crab.color.equals("yellow")) {
+        System.out.println(this.crab.color);
+        if(this.crab.color.equals("yellow") || this.crab.color.equals("green")) {
             this.fontcolor = Color.BLACK;
         } else {
             this.fontcolor = Color.WHITE;
@@ -15,7 +16,6 @@ public class Text extends Animal
     }
     
     public void text(String text) {
-        System.out.println(this.crab.color);
         setImage(new GreenfootImage(text, 15, this.fontcolor, this.getColor(this.crab.color)));
     }
     

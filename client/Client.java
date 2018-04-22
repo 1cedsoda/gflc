@@ -114,17 +114,7 @@ public class Client extends Actor
                 getWorld().removeObject((Actor)this.crabs.get(oid));
                 this.crabs.remove(oid);
                 if(crab.player) {
-                    System.out.println("GAME OVER");
-                    getWorld().removeObjects(getWorld().getObjects(Crab.class));
-                    getWorld().removeObjects(getWorld().getObjects(Text.class));
-                    getWorld().removeObjects(getWorld().getObjects(Lobster.class));
-                    getWorld().removeObjects(getWorld().getObjects(Worm.class));
-                    GameOver go = new GameOver();
-                    getWorld().addObject(go, 600, 200);
-                    try {
-                        Thread.sleep(3000);
-                    } catch(Exception e) {}
-                    System.exit(1);
+                    this.gameOver();
                 }
             } else if(type.equals("Lobster")) {
                 getWorld().removeObject((Actor)this.lobsters.get(oid));
@@ -164,5 +154,19 @@ public class Client extends Actor
         } else {
             System.out.println(this + ": Can't find class '"+type+"'");
         }
+    }
+    
+    public void gameOver() {
+        System.out.println("GAME OVER");
+                    getWorld().removeObjects(getWorld().getObjects(Crab.class));
+                    getWorld().removeObjects(getWorld().getObjects(Text.class));
+                    getWorld().removeObjects(getWorld().getObjects(Lobster.class));
+                    getWorld().removeObjects(getWorld().getObjects(Worm.class));
+                    GameOver go = new GameOver();
+                    getWorld().addObject(go, 600, 200);
+                    try {
+                        Thread.sleep(3000);
+                    } catch(Exception e) {}
+                    System.exit(1);
     }
 }
